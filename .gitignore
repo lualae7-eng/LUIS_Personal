@@ -1,0 +1,6 @@
+# Nunca datos ni credenciales
+*.xlsx
+*.csv
+respaldo/
+.env*
+node_modules/
