@@ -1,5 +1,5 @@
 /* FORJA · service worker: abre sin red. Los datos no pasan por aquí. */
-const CACHE = 'forja-luis-1.0.0';
+const CACHE = 'forja-luis-1.0.1';
 const BASE = ['/', '/index.html', '/app.css', '/app.js', '/fin-calc.js', '/finanzas.js', '/manifest.webmanifest',
   '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
 
