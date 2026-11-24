@@ -1,7 +1,8 @@
 /**
  * FORJA · Luis · Apps Script
  *
- * App personal de Luis: finanzas, proyectos, disciplina, gym, comidas y peso.
+ * App personal de Luis: tareas diarias, finanzas, proyectos, disciplina (hábitos,
+ * meditación, guitarra e idioma), gym, comidas y peso.
  * Todo vive en UN libro: "LUIS_Personal". Este script no abre ningún libro
  * de la empresa: no hay aquí ids ni funciones que lo hagan.
  *
@@ -20,12 +21,23 @@ const HOJAS = {
   Comidas: ['id', 'fecha', 'alimento_id', 'nombre', 'porciones', 'proteina', 'origen'],
   Peso: ['id', 'fecha', 'kg'],
   Config: ['id', 'valor'],
+  // Tareas diarias que se tachan; lo tachado dura el día.
+  Rituales: ['id', 'etiqueta', 'orden', 'activo'],
+  RitualesHechos: ['id', 'fecha', 'ritual_id', 'origen'],
+  // Minutos de práctica: actividad = meditacion | guitarra | idioma.
+  Practicas: ['id', 'fecha', 'actividad', 'minutos', 'idioma', 'nota', 'origen'],
+  Canciones: ['id', 'titulo', 'artista', 'estado', 'notas', 'creada'],
+  // Acordes y técnicas de guitarra: tipo = acorde | tecnica; estado = aprendiendo | dominado.
+  Tecnicas: ['id', 'nombre', 'tipo', 'estado', 'notas', 'creada'],
+  // Lecturas para el idioma.
+  Lecturas: ['id', 'idioma', 'titulo', 'estado', 'notas', 'creada'],
   Archivo: ['id', 'tipo', 'fecha', 'json'],
   Ops: ['id', 'tipo', 'momento', 'resultado']
 };
 // Hojas que la app puede escribir con put/del. Archivo y Ops solo los toca el script.
 const ESCRIBIBLES = ['Habitos', 'Marcas', 'Ejercicios',
-  'Sesiones', 'Series', 'Alimentos', 'Comidas', 'Peso', 'Config'];
+  'Sesiones', 'Series', 'Alimentos', 'Comidas', 'Peso', 'Config',
+  'Rituales', 'RitualesHechos', 'Practicas', 'Canciones', 'Tecnicas', 'Lecturas'];
 // Hojas que la app lee.
 const LEGIBLES = ESCRIBIBLES;
 
@@ -51,8 +63,8 @@ function instalar() {
 
 /**
  * Copia a LUIS_Personal el historial personal que hoy vive en FORJA_Personal:
- * hábitos, marcas, rutina, sesiones, series, alimentos, comidas, peso y Config.
- * NO copia las tareas diarias de la empresa : se quedan en su app.
+ * hábitos, marcas, rutina, sesiones, series, alimentos, comidas, peso, Config,
+ * las tareas diarias con su historial y las canciones del respaldo de Grok.
  * Solo LEE FORJA_Personal, no lo modifica. Repetirlo no duplica (por id).
  */
 function migrarDesdeForja() {
@@ -60,6 +72,7 @@ function migrarDesdeForja() {
   const origen = buscarLibro('FORJA_Personal');
   if (!origen) throw new Error('No encontré el libro FORJA_Personal en tu Drive');
   const destino = libroPersonal();
+  prepararLibro(destino, todasLasHojas()); // agrega las hojas nuevas si faltan
   const reporte = {};
   MIGRABLES.forEach(function (n) {
     const h = origen.getSheetByName(n);
@@ -69,10 +82,21 @@ function migrarDesdeForja() {
     r.origen = todas.length;
     reporte[n] = r;
   });
+  // Canciones que Grok guardó en Archivo (tipo "cancion").
+  const arch = origen.getSheetByName('Archivo');
+  const canciones = (arch ? filas(arch) : []).filter(function (f) { return f.tipo === 'cancion'; }).map(function (f) {
+    let x = {};
+    try { x = JSON.parse(f.json); } catch (_) { /* fila dañada */ }
+    return { id: f.id, titulo: x.title || x.titulo || '', artista: x.artist || x.artista || '', estado: '',
+      notas: 'Del respaldo de Grok', creada: String(x.createdAt || f.fecha || '').slice(0, 10) };
+  }).filter(function (c) { return c.titulo; });
+  reporte.Canciones = agregarFaltantes(destino.getSheetByName('Canciones'), HOJAS.Canciones, canciones) || {};
+  reporte.Canciones.origen = canciones.length;
   Object.keys(reporte).forEach(function (k) { Logger.log(k + ': ' + JSON.stringify(reporte[k])); });
   return reporte;
 }
-const MIGRABLES = ['Habitos', 'Marcas', 'Ejercicios', 'Sesiones', 'Series', 'Alimentos', 'Comidas', 'Peso', 'Config'];
+const MIGRABLES = ['Habitos', 'Marcas', 'Ejercicios', 'Sesiones', 'Series', 'Alimentos', 'Comidas', 'Peso', 'Config',
+  'Rituales', 'RitualesHechos'];
 
 function buscarLibro(nombre) {
   const it = DriveApp.getFilesByName(nombre);
@@ -178,7 +202,7 @@ function todasLasHojas() {
 function leerPersonal() {
   const libro = libroPersonal();
   const r = {};
-  LEGIBLES.forEach(function (n) { r[n] = filas(libro.getSheetByName(n)); });
+  LEGIBLES.forEach(function (n) { const h = libro.getSheetByName(n); r[n] = h ? filas(h) : []; });
   return r;
 }
 

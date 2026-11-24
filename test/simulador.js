@@ -73,7 +73,7 @@ function forjaDePrueba() {
   return new Libro('FORJA_Personal', {
     Habitos: [['id', 'nombre', 'nota', 'color', 'dias', 'creado', 'activo', 'orden'], ['h1', 'Leer', '', '', '1234567', '2026-09-01', 'true', 1]],
     Marcas: [['id', 'fecha', 'habito_id', 'origen'], ['m1', '2026-10-01', 'h1', 'app'], ['m2', '2026-10-02', 'h1', 'app']],
-    Rituales: [['id', 'etiqueta', 'orden', 'activo'], ['r1', 'Tarea de la empresa', 1, 'true']],
+    Rituales: [['id', 'etiqueta', 'orden', 'activo'], ['r1', 'Revisar pendientes', 1, 'true']],
     RitualesHechos: [['id', 'fecha', 'ritual_id', 'origen'], ['rh1', '2026-10-02', 'r1', 'app']],
     Ejercicios: [['id', 'nombre', 'dia', 'esquema', 'descanso_s', 'nota', 'orden', 'activo'], ['e1', 'Sentadilla', 'pierna', '4x8', 120, '', 1, 'true']],
     Sesiones: [['id', 'fecha', 'dia', 'cerrada'], ['s1', '2026-10-01', 'pierna', 'true']],
@@ -81,7 +81,10 @@ function forjaDePrueba() {
     Alimentos: [['id', 'nombre', 'porcion', 'proteina', 'activo'], ['a1', 'Huevo', '1 pza', 6, 'true']],
     Comidas: [['id', 'fecha', 'alimento_id', 'nombre', 'porciones', 'proteina', 'origen'], ['c1', '2026-10-01', 'a1', 'Huevo', 3, 18, 'app']],
     Peso: [['id', 'fecha', 'kg'], ['p1', '2026-10-01', 80]],
-    Config: [['id', 'valor'], ['plan', 'pierna,empuje,tiron,brazos,torso,libre,off']]
+    Config: [['id', 'valor'], ['plan', 'pierna,empuje,tiron,brazos,torso,libre,off']],
+    Archivo: [['id', 'tipo', 'fecha', 'json'],
+      ['cancion:g1', 'cancion', '2026-10-03', JSON.stringify({ id: 'g1', title: 'Canción demo', createdAt: '2026-10-03T10:00:00Z' })],
+      ['prioridad:p1', 'prioridad', '2026-10-03', JSON.stringify({ id: 'p1', text: 'algo' })]]
   });
 }
 

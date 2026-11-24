@@ -1,6 +1,14 @@
 # FORJA · Luis
 
-App personal de Luis: finanzas, proyectos, disciplina, gym, comidas y peso.
+App personal de Luis. Solo tuya: lo de LUAL vive en la oficina de LUAL.
+
+| Pestaña | Qué lleva |
+|---|---|
+| Hoy | Tareas del día que se tachan (duran tachadas hasta medianoche), práctica del día y resumen de dinero |
+| Dinero | Movimientos, Nu y Plata, presupuesto, cuentas y Excel |
+| Proyectos | Cada proyecto con su caja, productos y punto de equilibrio |
+| Disciplina | Hábitos · Meditación (meta 10 min diarios) · Guitarra (minutos, canciones, acordes y técnica) · Idioma (minutos y lecturas; hoy Inglés) |
+| Cuerpo | Gym, comidas con proteína y peso |
 Separada de LUAL: este código no abre ni conoce el contable de la empresa.
 
 - `app/`: PWA estática (Vercel, Root Directory `app`).
@@ -12,7 +20,7 @@ Separada de LUAL: este código no abre ni conoce el contable de la empresa.
 
 1. script.google.com → Nuevo proyecto "FORJA Luis". Pega `Codigo.gs` y `appsscript.json`.
 2. Ejecuta `instalar`. Crea LUIS_Personal y la clave (sale en el registro; no la compartas).
-3. Ejecuta `migrarDesdeForja`. Copia hábitos, marcas, gym, comidas, peso y Config desde
+3. Ejecuta `migrarDesdeForja` (agrega las hojas nuevas; repetirlo no duplica). Copia hábitos, marcas, gym, comidas, peso y Config desde
    FORJA_Personal. No copia las tareas de LUAL. Solo lee el origen; repetirlo no duplica.
 4. Ejecuta `instalarPruebas` (copia para el entorno de pruebas).
 5. Implementar → Aplicación web (ejecutar como tú, acceso: cualquiera). Copia la URL /exec.

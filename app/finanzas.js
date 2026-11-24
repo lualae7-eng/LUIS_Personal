@@ -33,7 +33,10 @@ function sinFinanzas() {
 /* ================================================================== */
 
 VISTAS.inicio = () => {
-  return S.ambito === 'proyectos' ? inicioProyectos() : inicioPersonal();
+  if (S.ambito === 'proyectos') return inicioProyectos();
+  const t = hoy();
+  return encabezado(DIA_LARGO[dow(t)] + ' ' + fechaCorta(t), 'Hoy', 'Lo que haces todos los días, aunque nadie lo vea.') +
+    tareasDiarias() + practicaHoy() + inicioPersonal();
 };
 
 function inicioPersonal() {
@@ -48,7 +51,7 @@ function inicioPersonal() {
   const fl = FC.flujo(F().Movimientos, m1, m2);
   const prox = L.esperados[0];
 
-  let h = encabezado('Personal · ' + DIA_LARGO[dow(t)] + ' ' + fechaCorta(t), 'Tu dinero', 'Lo cobrado cuenta. Lo esperado se espera.');
+  let h = encabezado('Dinero', 'Tu dinero', 'Lo cobrado cuenta. Lo esperado se espera.');
 
   // Alertas: solo con datos registrados.
   const alertas = [];
