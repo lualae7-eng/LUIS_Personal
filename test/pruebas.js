@@ -103,13 +103,13 @@ function listo() {
 }
 const PERSONALES = ['Habitos', 'Marcas', 'Ejercicios', 'Sesiones', 'Series', 'Alimentos', 'Comidas', 'Peso', 'Config'];
 
-test('instalar crea un solo libro LUIS_Personal con todo, sin Rituales', () => {
+test('instalar crea un solo libro LUIS_Personal con todo', () => {
   const { e } = listo();
   const l = e.libro();
   assert.equal(l.getName ? l.nombre : l.nombre, 'LUIS_Personal');
   const hojas = l.getSheets().map(h => h.getName());
   PERSONALES.concat(['Cuentas', 'Movimientos', 'Tarjetas', 'Proyectos', 'Tareas', 'Bitacora', 'Ops']).forEach(n => assert.ok(hojas.includes(n), n));
-  assert.ok(!hojas.some(n => /ritual/i.test(n)));
+  ['Rituales', 'RitualesHechos', 'Practicas', 'Canciones', 'Tecnicas', 'Lecturas'].forEach(n => assert.ok(hojas.includes(n), n));
 });
 
 test('siembra los datos del 20/10 sin inventar los pendientes', () => {
@@ -134,8 +134,9 @@ test('migrarDesdeForja copia todo lo personal, deja fuera las tareas de la empre
   assert.equal(p.Comidas[0].proteina, '18');
   assert.equal(p.Peso[0].kg, '80');
   assert.equal(p.Config[0].valor, 'pierna,empuje,tiron,brazos,torso,libre,off');
-  assert.ok(!('Rituales' in p) && !('RitualesHechos' in p));
-  assert.ok(!e.libro().getSheetByName('Rituales'));
+  assert.equal(p.Rituales[0].etiqueta, 'Revisar pendientes', 'las tareas diarias se copian');
+  assert.equal(p.RitualesHechos.length, 1);
+  assert.deepEqual(p.Canciones.map(c => [c.titulo, c.creada]), [['Canción demo', '2026-10-03']], 'solo canciones del Archivo, sin duplicar');
   assert.equal(JSON.stringify(e.origen.hojas.map(h => h.d)), antes, 'FORJA_Personal intacto');
 });
 
@@ -158,7 +159,7 @@ test('las operaciones de la empresa no existen aquí', () => {
     const r = e.post({ token, ops: [{ id: 'o-' + tipo, tipo, monto: 1 }] }).resultados[0];
     assert.equal(r.ok, false, tipo);
   });
-  assert.match(e.post({ token, ops: [{ id: 'r', tipo: 'put', hoja: 'Rituales', fila: { id: 'x' } }] }).resultados[0].error, /no permitida/);
+  assert.match(e.post({ token, ops: [{ id: 'r', tipo: 'put', hoja: 'Archivo', fila: { id: 'x' } }] }).resultados[0].error, /no permitida/);
 });
 
 test('escribe y valida finanzas con bitácora', () => {
@@ -187,4 +188,20 @@ test('pruebas trabaja sobre una copia y no toca producción', () => {
 test('clave equivocada no lee nada', () => {
   const { e } = listo();
   assert.deepEqual(e.get({ token: 'mala' }), { ok: false, error: 'clave' });
+});
+
+test('práctica de meditación, guitarra e idioma se guarda y se lee', () => {
+  const { e, token } = listo();
+  const r = e.post({ token, ops: [
+    { id: 'p1', tipo: 'put', hoja: 'Practicas', fila: { id: 'pr1', fecha: HOY, actividad: 'meditacion', minutos: 10, idioma: '', nota: '', origen: 'app' } },
+    { id: 'p2', tipo: 'put', hoja: 'Canciones', fila: { id: 'c1', titulo: 'Wonderwall', artista: 'Oasis', estado: 'aprendiendo', notas: '', creada: HOY } },
+    { id: 'p3', tipo: 'put', hoja: 'Tecnicas', fila: { id: 't1', nombre: 'Fa con cejilla', tipo: 'acorde', estado: 'aprendiendo', notas: '', creada: HOY } },
+    { id: 'p4', tipo: 'put', hoja: 'Lecturas', fila: { id: 'l1', idioma: 'Inglés', titulo: 'The Little Prince', estado: 'leyendo', notas: '', creada: HOY } }
+  ] });
+  assert.ok(r.resultados.every(x => x.ok), JSON.stringify(r));
+  const p = e.get({ token }).personal;
+  assert.equal(p.Practicas[0].minutos, '10');
+  assert.equal(p.Canciones[0].artista, 'Oasis');
+  assert.equal(p.Tecnicas[0].tipo, 'acorde');
+  assert.equal(p.Lecturas[0].idioma, 'Inglés');
 });

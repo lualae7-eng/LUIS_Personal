@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const VERSION = '1.0.1';
+const VERSION = '1.1.0';
 const BLOQUEO_MS = 2 * 60 * 1000;
 
 /* ================================================================== */
@@ -21,7 +21,7 @@ const LS = {
 };
 
 const HOJAS = ['Habitos', 'Marcas', 'Ejercicios', 'Sesiones', 'Series',
-  'Alimentos', 'Comidas', 'Peso', 'Config'];
+  'Alimentos', 'Comidas', 'Peso', 'Config', 'Rituales', 'RitualesHechos', 'Practicas', 'Canciones', 'Tecnicas', 'Lecturas'];
 const vacias = () => Object.fromEntries(HOJAS.map(h => [h, []]));
 const HOJAS_FIN = ['Cuentas', 'Movimientos', 'Tarjetas', 'EstadosTarjeta', 'Convenios', 'Presupuestos', 'Proyectos', 'ProyectoProductos', 'Tareas'];
 const vaciasFin = () => Object.fromEntries(HOJAS_FIN.map(h => [h, []]));
@@ -37,7 +37,7 @@ const S = {
   fallidas: LS.get('fallidas', []),
   sync: LS.get('sync', { ultimo: null, error: null }),
   tab: LS.get('tab', 'inicio'),
-  ui: { cuerpo: 'gym', diaGym: null, g: {}, fin: 'movimientos', filtro: 'mes', proyecto: null }
+  ui: { disc: 'habitos', cuerpo: 'gym', diaGym: null, g: {}, fin: 'movimientos', filtro: 'mes', proyecto: null }
 };
 
 function guardar() {
@@ -501,7 +501,8 @@ function render({ forzar = false } = {}) {
   $$('#tabs button').forEach(b => {
     if (b.dataset.tab === S.tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   });
-  const ph = habitosPendientes();
+  const ph = habitosPendientes(), pr = ritualesPendientes();
+  $('[data-badge="inicio"]').textContent = pr ? pr : '';
   $$('[data-ambito]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ambito === S.ambito)));
   document.body.dataset.ambito = S.ambito;
   document.body.dataset.entorno = entorno();
